@@ -1,6 +1,6 @@
 # metersphere-mcp
 
-MeterSphere（v3.x / lite）MCP server：让本地 agent（Claude Code / Cursor / Codex 等）通过平台
+MeterSphere（v3.x / lite）MCP server：让本地 agent（Claude Code / Codex / DeepSeek harness 等）通过平台
 REST API + AK/SK 鉴权，实现**功能用例增删改查、模块管理、测试计划创建查询、计划关联用例**。
 纯客户端实现，平台侧零改动。
 
@@ -21,7 +21,49 @@ claude mcp add metersphere -s user \
 - 前置条件：[uv](https://docs.astral.sh/uv/)（`uvx` 随 uv 安装）
 - 装完重启会话，用 `whoami` 验证连通性
 
-配套 Skill（用例编写规范，按需加载、平时零开销）：
+## 安装到 Codex CLI
+
+编辑 `~/.codex/config.toml`：
+
+```toml
+[mcp_servers.metersphere]
+command = "uvx"
+args = ["--from", "git+https://github.com/Ewan-yuan/metersphere-mcp", "metersphere-mcp"]
+
+[mcp_servers.metersphere.env]
+MS_BASE_URL = "https://your-metersphere.example.com"
+MS_ACCESS_KEY = "你的AK"
+MS_SECRET_KEY = "你的SK"
+MS_READ_ONLY = "false"
+```
+
+保存后重启 Codex 会话即可。
+
+## 安装到 DeepSeek harness（及一切标准 MCP 客户端）
+
+任何支持 stdio MCP 的 harness 通用：把下面 JSON 写入该工具的 MCP 配置
+（常见位置：项目根 `.mcp.json`，或该工具文档指定的配置文件）：
+
+```json
+{
+  "mcpServers": {
+    "metersphere": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/Ewan-yuan/metersphere-mcp", "metersphere-mcp"],
+      "env": {
+        "MS_BASE_URL": "https://your-metersphere.example.com",
+        "MS_ACCESS_KEY": "你的AK",
+        "MS_SECRET_KEY": "你的SK",
+        "MS_READ_ONLY": "false"
+      }
+    }
+  }
+}
+```
+
+## 配套 Skill（Claude Code）
+
+用例编写规范，按需加载、平时零开销：
 
 ```bash
 git clone --depth 1 https://github.com/Ewan-yuan/metersphere-mcp /tmp/ms-mcp \
@@ -43,6 +85,14 @@ Copy-Item -Recurse "$env:TEMP\ms-mcp\skills\metersphere" "$env:USERPROFILE\.clau
 `GET /user/api/key/add` 代为生成）。AK 所属用户需在目标项目具有用例/计划读写权限。
 签名协议：`signature = Base64(AES-128-CBC("accessKey|uuid|timestampMs", key=SK, iv=AK))`，
 与 MeterSphere `ApiKeyHandler` 完全一致。
+
+## 安装后 agent 获得什么能力
+
+**只读模式（默认）**：agent 能查询你的项目/模块/用例/测试计划/测试集，检索现有测试资产。
+
+**写模式（MS_READ_ONLY=false）**：agent 能以 AK 所属账号身份创建/修改/删除功能用例
+（删除进回收站）、建模块、建测试计划、把用例关联进计划。权限边界 = 该账号的平台权限，
+越权操作会被平台拒绝并留操作日志；SK 不经过 agent（签名在 server 进程内完成）。
 
 ## 工具清单
 
