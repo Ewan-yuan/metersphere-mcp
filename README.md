@@ -18,7 +18,7 @@ claude mcp add metersphere -s user \
 
 - `MS_BASE_URL`：平台地址（后端根路径，如 `https://test.example.com`；若仅前端反代可用 `https://host/front`）
 - `MS_READ_ONLY` 省略或 `true` 时只注册 9 个只读工具（≈2K tokens）；`false` 注册全部 15 个（≈3.6K tokens）
-- 前置条件：[uv](https://docs.astral.sh/uv/)（`uvx` 随 uv 安装）
+- 前置条件：[uv](https://docs.astral.sh/uv/)（`uvx` 随 uv 安装）—— macOS/Linux：`curl -LsSf https://astral.sh/uv/install.sh | sh`；Windows：`powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
 - 装完重启会话，用 `whoami` 验证连通性
 
 ## 安装到 Codex CLI
