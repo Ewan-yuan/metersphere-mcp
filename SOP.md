@@ -16,11 +16,15 @@
 
 ## 二、准备
 
-1. 安装 [uv](https://docs.astral.sh/uv/)（Windows PowerShell：`powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`）
+1. 安装 [uv](https://docs.astral.sh/uv/)（`uvx` 随 uv 一起安装）
+   - **macOS / Linux**：`curl -LsSf https://astral.sh/uv/install.sh | sh`（或 `brew install uv`）
+   - **Windows**（PowerShell）：`powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
 2. 平台**个人中心 → 个人设置 → API KEY → 新增**，生成 AK/SK（Secret Key 仅创建时可见，及时复制）
 3. 记下平台地址（如 `https://test.example.com`）
 
 ## 三、安装（按所用 agent 三选一）
+
+以下命令 macOS / Linux / Windows 通用，仅配置文件路径有差异（已分别标注）。
 
 ### 3.1 Claude Code
 
@@ -32,9 +36,11 @@ claude mcp add metersphere -s user \
   uvx --from git+https://github.com/Ewan-yuan/metersphere-mcp metersphere-mcp
 ```
 
+> 命令写入了用户级配置（macOS / Linux：`~/.claude.json`；Windows：`%USERPROFILE%\.claude.json`）。Windows CMD 下把 `\` 换行去掉写成一行，或改用 PowerShell。
+
 ### 3.2 Codex CLI
 
-编辑 `~/.codex/config.toml`，追加：
+编辑配置文件（**macOS / Linux**：`~/.codex/config.toml`；**Windows**：`%USERPROFILE%\.codex\config.toml`），追加：
 
 ```toml
 [mcp_servers.metersphere]
@@ -50,7 +56,7 @@ MS_READ_ONLY = "false"
 
 ### 3.3 DeepSeek harness（及一切标准 MCP 客户端）
 
-把下面的 JSON 写入该工具的 MCP 配置文件（常见位置：项目根目录 `.mcp.json`）：
+把下面的 JSON 写入该工具的 MCP 配置文件（**两平台通用位置：项目根目录 `.mcp.json`**；全局配置路径见所用工具文档，macOS / Linux 多在 `~/.config/<工具名>/` 下）：
 
 ```json
 {
@@ -69,7 +75,9 @@ MS_READ_ONLY = "false"
 }
 ```
 
-> Claude Code 用户可选装配套 Skill（用例编写规范，按需加载不占上下文），见仓库 README「配套 Skill」一节。
+> **可选**：Claude Code 用户可安装配套 Skill（用例编写规范，按需加载不占上下文）——
+> macOS / Linux：`git clone --depth 1 https://github.com/Ewan-yuan/metersphere-mcp /tmp/ms-mcp && mkdir -p ~/.claude/skills && cp -r /tmp/ms-mcp/skills/metersphere ~/.claude/skills/ && rm -rf /tmp/ms-mcp`
+> Windows（PowerShell）：`Copy-Item -Recurse "$env:TEMP\ms-mcp\skills\metersphere" "$env:USERPROFILE\.claude\skills\"`（clone 到 `$env:TEMP\ms-mcp` 后）
 
 ## 四、验证
 
